@@ -431,7 +431,10 @@ func (p *beautifyPrinter) VisitLiteral(node *ast.Literal) any {
 			p.write(fmt.Sprintf("%v", node.Value))
 		}
 	case "string":
-		p.write(fmt.Sprintf("%q", node.Value))
+		s, _ := node.Value.(string)
+		p.write(`"`)
+		p.write(s)
+		p.write(`"`)
 	default:
 		if node.Value == nil {
 			p.write("nil")
