@@ -501,8 +501,8 @@ func (p *beautifyPrinter) VisitTableLiteral(node *ast.TableLiteral) any {
 	for i, field := range node.Fields {
 		p.writeIndent()
 		if field.Key != nil {
-			if ident, ok := field.Key.(*ast.Identifier); ok {
-				p.write(ident.Name)
+			if lit, ok := field.Key.(*ast.Literal); ok && lit.Type == "string" {
+				p.write(lit.Value.(string))
 				p.write(" = ")
 			} else {
 				p.write("[")
