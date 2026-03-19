@@ -2,6 +2,7 @@ package beautifier
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/Wh1teSlash/luau-parser/ast"
@@ -418,10 +419,25 @@ func (p *beautifyPrinter) VisitIdentifier(node *ast.Identifier) any {
 }
 
 func (p *beautifyPrinter) VisitLiteral(node *ast.Literal) any {
-	if node.Type == "string" {
-		p.write(fmt.Sprintf("%q", node.Value))
-	} else {
+	switch node.Type {
+	case "nil":
+		p.write("nil")
+	case "boolean":
 		p.write(fmt.Sprintf("%v", node.Value))
+	case "number":
+		if f, ok := node.Value.(float64); ok {
+			p.write(strconv.FormatFloat(f, 'f', -1, 64))
+		} else {
+			p.write(fmt.Sprintf("%v", node.Value))
+		}
+	case "string":
+		p.write(fmt.Sprintf("%q", node.Value))
+	default:
+		if node.Value == nil {
+			p.write("nil")
+		} else {
+			p.write(fmt.Sprintf("%v", node.Value))
+		}
 	}
 	return nil
 }
