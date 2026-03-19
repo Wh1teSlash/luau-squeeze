@@ -491,6 +491,24 @@ func (p *beautifyPrinter) VisitFieldAccess(node *ast.FieldAccess) any {
 	return nil
 }
 
+func isValidIdentifier(s string) bool {
+	if len(s) == 0 {
+		return false
+	}
+	for i, ch := range s {
+		if i == 0 {
+			if !((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || ch == '_') {
+				return false
+			}
+		} else {
+			if !((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9') || ch == '_') {
+				return false
+			}
+		}
+	}
+	return true
+}
+
 func (p *beautifyPrinter) VisitTableLiteral(node *ast.TableLiteral) any {
 	if len(node.Fields) == 0 {
 		p.write("{}")
@@ -502,8 +520,14 @@ func (p *beautifyPrinter) VisitTableLiteral(node *ast.TableLiteral) any {
 		p.writeIndent()
 		if field.Key != nil {
 			if lit, ok := field.Key.(*ast.Literal); ok && lit.Type == "string" {
-				p.write(lit.Value.(string))
-				p.write(" = ")
+				if s, ok := lit.Value.(string); ok && isValidIdentifier(s) {
+					p.write(s)
+					p.write(" = ")
+				} else {
+					p.write("[")
+					field.Key.Accept(p)
+					p.write("] = ")
+				}
 			} else {
 				p.write("[")
 				field.Key.Accept(p)
